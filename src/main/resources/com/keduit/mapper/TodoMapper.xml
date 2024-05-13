@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.keduit.mapper.TodoMapper">
+
+	<select id="getListWithPaging" resultType="com.keduit.domain.TodoVO">
+		select tno, title, writer, duedate, finished
+		from(
+		select
+		/*+ index_desc(t_todo SYS_C007029)*/
+		rownum rn, tno, title, writer, duedate, finished
+		form t_todo
+		where
+		<![CDATA[
+			rownum <= #{pageNum} * #{amount}
+		)	
+			where rn > (#{pageNum}-1)* #{amount}
+		]]>
+		
+	</select>
+
+	<select id="getList" resultType="com.keduit.domain.TodoVO">
+		select * from t_todo order by tno desc
+	</select>
+	
+	<insert id="insert">
+		insert into t_todo (tno, title, writer)
+		values (seq_todo.nextval, #{title}, #{writer})
+	</insert>
+	
+	<insert id="insertSelectKey">
+		<selectKey keyProperty="tno" order="BEFORE"
+			resultType="long">
+			select seq_todo.nextval from dual
+		</selectKey>
+		insert into t_todo (tno,title,writer,duedate)
+		values(#{tno}, #{title}, #{writer}, #{duedate})
+	</insert>
+	
+	<select id="read" resultType="com.keduit.domain.TodoVO">
+		select * from t_todo where tno=#{tno}
+	</select>
+	
+	<delete id="delete">
+		delete from t_todo where tno=#{tno}
+	</delete>
+	
+	<update id="update">
+		update t_todo set title=#{title},
+							writer=#{writer},
+							duedate=#{duedate},
+							finished=#{finished}
+							where tno=#{tno}
+	</update>
+	
+</mapper>
+
+
+
+
